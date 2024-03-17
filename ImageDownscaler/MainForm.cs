@@ -82,7 +82,7 @@ namespace ImageDownscaler
 
             double reductionFactor = double.Parse(DownsizeNumberTextBox.Text);
 
-            Color[][] scaledPixels = ParallelDownsizer.ScaleDownWithInterpolation(sourcePixels, reductionFactor);
+            Color[][] scaledPixels = ParallelDownsizer.ParallelInterpoaltion(sourcePixels, reductionFactor);
 
             Bitmap scaledImage = ColorArrayToBitmap(scaledPixels);
 

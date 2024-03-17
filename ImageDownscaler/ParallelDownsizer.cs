@@ -6,7 +6,7 @@ namespace ImageDownscaler
 {
     internal class ParallelDownsizer
     {
-        public static Color[][] ScaleDownWithInterpolation(Color[][] sourcePixels, double reductionFactor)
+        public static Color[][] ParallelInterpoaltion(Color[][] sourcePixels, double reductionFactor)
         {
             int sourceHeight = sourcePixels.Length;
             int sourceWidth = sourcePixels[0].Length;
@@ -15,7 +15,6 @@ namespace ImageDownscaler
 
             var newPixels = new Color[resultHeight][];
 
-            // Initialize each row of the new pixels array
             for (int i = 0; i < resultHeight; i++)
             {
                 newPixels[i] = new Color[resultWidth];
@@ -45,7 +44,7 @@ namespace ImageDownscaler
             double xProximity = sourceX - leftBound;
             double yProximity = sourceY - topBound;
 
-            return InterpolatePixelColors(
+            return InterpolateColors(
                 sourcePixels[topBound][leftBound],
                 sourcePixels[topBound][rightBound],
                 sourcePixels[bottomBound][leftBound],
@@ -55,27 +54,24 @@ namespace ImageDownscaler
             );
         }
 
-        private static Color InterpolatePixelColors(Color topLeft, Color topRight, Color bottomLeft, Color bottomRight, double xProximity, double yProximity)
+        private static Color InterpolateColors(Color topLeft, Color topRight, Color bottomLeft, Color bottomRight, double xProximity, double yProximity)
         {
-            int alpha = CalculateInterpolatedValue(topLeft.A, topRight.A, bottomLeft.A, bottomRight.A, xProximity, yProximity);
-            int red = CalculateInterpolatedValue(topLeft.R, topRight.R, bottomLeft.R, bottomRight.R, xProximity, yProximity);
-            int green = CalculateInterpolatedValue(topLeft.G, topRight.G, bottomLeft.G, bottomRight.G, xProximity, yProximity);
-            int blue = CalculateInterpolatedValue(topLeft.B, topRight.B, bottomLeft.B, bottomRight.B, xProximity, yProximity);
+            int a = InterpolatedValue(topLeft.A, topRight.A, bottomLeft.A, bottomRight.A, xProximity, yProximity);
+            int r = InterpolatedValue(topLeft.R, topRight.R, bottomLeft.R, bottomRight.R, xProximity, yProximity);
+            int g = InterpolatedValue(topLeft.G, topRight.G, bottomLeft.G, bottomRight.G, xProximity, yProximity);
+            int b = InterpolatedValue(topLeft.B, topRight.B, bottomLeft.B, bottomRight.B, xProximity, yProximity);
 
-            return Color.FromArgb(alpha, red, green, blue);
+            return Color.FromArgb(a, r, g, b);
         }
 
-        private static int CalculateInterpolatedValue(int topLeft, int topRight, int bottomLeft, int bottomRight, double xProximity, double yProximity)
+        private static int InterpolatedValue(int topLeft, int topRight, int bottomLeft, int bottomRight, double xProximity, double yProximity)
         {
-            double top = WeightedAverage(topLeft, topRight, xProximity);
-            double bottom = WeightedAverage(bottomLeft, bottomRight, xProximity);
-            return (int)WeightedAverage(top, bottom, yProximity);
+            double top = topLeft * (1 - xProximity) + topRight * xProximity;
+            double bottom = bottomLeft * (1 - xProximity) + bottomRight * xProximity;
+            return (int)(top * (1 - xProximity) + bottom * xProximity);
+
         }
 
-        private static double WeightedAverage(double value1, double value2, double weight)
-        {
-            return value1 * (1 - weight) + value2 * weight;
-        }
     }
 }
        
